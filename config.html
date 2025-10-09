@@ -99,11 +99,16 @@
 <body>
     <div class="container">
         <h1>Alterar Senha</h1>
-        <p>Defina uma senha para habilitar o login com email e senha.</p>
+        <p>Insira sua senha atual e a nova senha para atualizar sua conta.</p>
         <form id="alterarSenhaForm">
             <div class="form-group">
                 <label for="email">E-mail:</label>
                 <input type="email" id="email" readonly>
+            </div>
+            <div class="form-group">
+                <label for="senhaAtual">Senha Atual:</label>
+                <input type="password" id="senhaAtual" required>
+                <div id="senhaAtualError" class="error"></div>
             </div>
             <div class="form-group">
                 <label for="novaSenha">Nova Senha:</label>
@@ -111,7 +116,7 @@
                 <div id="novaSenhaError" class="error"></div>
             </div>
             <div class="form-group">
-                <label for="confirmarSenha">Confirmar Senha:</label>
+                <label for="confirmarSenha">Confirmar Nova Senha:</label>
                 <input type="password" id="confirmarSenha" required>
                 <div id="confirmarSenhaError" class="error"></div>
             </div>
@@ -175,17 +180,20 @@
 
         // Função para alterar a senha
         async function alterarSenha() {
+            const senhaAtual = document.getElementById('senhaAtual').value;
             const novaSenha = document.getElementById('novaSenha').value;
             const confirmarSenha = document.getElementById('confirmarSenha').value;
+            const senhaAtualError = document.getElementById('senhaAtualError');
             const novaSenhaError = document.getElementById('novaSenhaError');
             const confirmarSenhaError = document.getElementById('confirmarSenhaError');
             const user = auth.currentUser;
 
             // Limpar mensagens de erro
+            senhaAtualError.textContent = '';
             novaSenhaError.textContent = '';
             confirmarSenhaError.textContent = '';
 
-            // Validar senha
+            // Validar nova senha
             const erroSenha = validarSenha(novaSenha);
             if (erroSenha) {
                 novaSenhaError.textContent = erroSenha;
@@ -199,24 +207,29 @@
             }
 
             try {
-                // Vincular credenciais de email/senha à conta existente
-                const credential = firebase.auth.EmailAuthProvider.credential(user.email, novaSenha);
-                await user.linkWithCredential(credential);
-                alert('Senha definida com sucesso! Agora você pode fazer login com email e senha.');
-                window.location.href = 'index.html'; // Redirecionar para a página principal
+                // Reautenticar o usuário
+                const credential = firebase.auth.EmailAuthProvider.credential(user.email, senhaAtual);
+                await user.reauthenticateWithCredential(credential);
+
+                // Alterar a senha
+                await user.updatePassword(novaSenha);
+                alert('Senha alterada com sucesso! Faça login novamente com sua nova senha.');
+                auth.signOut().then(() => {
+                    window.location.href = 'login.html';
+                });
             } catch (error) {
-                console.error('Erro ao definir senha:', error);
-                if (error.code === 'auth/requires-recent-login') {
+                console.error('Erro ao alterar senha:', error);
+                if (error.code === 'auth/wrong-password') {
+                    senhaAtualError.textContent = 'Senha atual incorreta. Tente novamente.';
+                } else if (error.code === 'auth/requires-recent-login') {
                     alert('Sua sessão expirou. Por favor, faça login novamente para continuar.');
                     auth.signOut().then(() => {
                         window.location.href = 'login.html';
                     });
                 } else if (error.code === 'auth/weak-password') {
                     novaSenhaError.textContent = 'A senha é muito fraca. Tente uma senha mais forte.';
-                } else if (error.code === 'auth/credential-already-in-use') {
-                    novaSenhaError.textContent = 'Este email já está vinculado a outra conta com senha. Tente fazer login com email e senha diretamente.';
                 } else {
-                    novaSenhaError.textContent = 'Erro ao definir a senha. Verifique o console para mais detalhes.';
+                    novaSenhaError.textContent = 'Erro ao alterar a senha. Verifique o console para mais detalhes.';
                 }
             }
         }

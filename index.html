@@ -75,6 +75,14 @@
             border-color: #3b82f6;
             box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
         }
+        input[type="number"] {
+            -moz-appearance: textfield; /* Remove as setas no Firefox */
+        }
+        input[type="number"]::-webkit-inner-spin-button,
+        input[type="number"]::-webkit-outer-spin-button {
+            -webkit-appearance: none; /* Remove as setas no Chrome/Safari */
+            margin: 0;
+        }
         .calculated {
             background-color: #f9fafb;
             padding: 14px;
@@ -331,19 +339,19 @@
             </div>
             <div class="form-group">
                 <label for="areaTerrenoCadastro">Área do Terreno (m²):</label>
-                <input type="number" id="areaTerrenoCadastro" step="0.01" inputmode="decimal" required>
+                <input type="number" id="areaTerrenoCadastro" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group">
                 <label for="areaConstruidaCadastro">Área Construída (m²):</label>
-                <input type="number" id="areaConstruidaCadastro" step="0.01" inputmode="decimal" required>
+                <input type="number" id="areaConstruidaCadastro" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group">
                 <label for="numeroPavimentos">Número de Pavimentos:</label>
-                <input type="number" id="numeroPavimentos" inputmode="numeric" required>
+                <input type="number" id="numeroPavimentos" inputmode="numeric" required onwheel="return false;">
             </div>
             <div class="form-group">
                 <label for="idadeConstrucao">Idade da Construção (anos):</label>
-                <input type="number" id="idadeConstrucao" inputmode="numeric" required>
+                <input type="number" id="idadeConstrucao" inputmode="numeric" required onwheel="return false;">
             </div>
             <div class="form-group">
                 <label for="materialConstrucao">Material de Construção Predominante:</label>
@@ -384,11 +392,11 @@
         <form id="iptuForm">
             <div class="form-group">
                 <label for="areaTerreno">Área do Terreno (m²):</label>
-                <input type="number" id="areaTerreno" step="0.01" inputmode="decimal" required>
+                <input type="number" id="areaTerreno" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group">
                 <label for="valorMqTerreno">Valor m² Terreno (R$):</label>
-                <input type="number" id="valorMqTerreno" step="0.01" inputmode="decimal" required>
+                <input type="number" id="valorMqTerreno" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group calculated">
                 <label>Valor do Terreno (VT):</label>
@@ -396,19 +404,19 @@
             </div>
             <div class="form-group">
                 <label for="areaConstruida">Área Construída (m²):</label>
-                <input type="number" id="areaConstruida" step="0.01" inputmode="decimal" required>
+                <input type="number" id="areaConstruida" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group">
                 <label for="valorMqConstrucao">Valor m² Construção (R$):</label>
-                <input type="number" id="valorMqConstrucao" step="0.01" inputmode="decimal" required>
+                <input type="number" id="valorMqConstrucao" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group">
                 <label for="fatorIdade">Fator Idade:</label>
-                <input type="number" id="fatorIdade" step="0.01" inputmode="decimal" required>
+                <input type="number" id="fatorIdade" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group">
                 <label for="fatorPadrao">Fator Padrão:</label>
-                <input type="number" id="fatorPadrao" step="0.01" inputmode="decimal" required>
+                <input type="number" id="fatorPadrao" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group calculated">
                 <label>Valor da Construção (VC):</label>
@@ -420,7 +428,7 @@
             </div>
             <div class="form-group">
                 <label for="aliquota">Alíquota (%):</label>
-                <input type="number" id="aliquota" step="0.01" inputmode="decimal" required>
+                <input type="number" id="aliquota" step="0.01" inputmode="decimal" required onwheel="return false;">
             </div>
             <div class="form-group calculated">
                 <label>IPTU (R$):</label>

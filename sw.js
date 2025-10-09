@@ -1,4 +1,4 @@
-const CACHE_NAME = 'iptu-careiro-v2';
+const CACHE_NAME = 'iptu-careiro-v1';
 const urlsToCache = [
   '/',
   '/index.html',

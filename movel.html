@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consulta de IPTU Careiro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Adicionando Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', sans-serif;
+        }
+
+        body {
+            background-color: #f4f7fa;
+            color: #333;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 16px;
+        }
+
+        .container {
+            max-width: 100%;
+            width: 100%;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 24px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo {
+            display: block;
+            margin: 0 auto 24px auto;
+            max-width: 100px;
+        }
+
+        h1 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            text-align: center;
+            color: #1a3c5e;
+            margin-bottom: 32px;
+        }
+
+        .form-group {
+            margin-bottom: 16px;
+        }
+
+        label {
+            display: block;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: #1a3c5e;
+            margin-bottom: 8px;
+        }
+
+        input[type="text"] {
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            outline: none;
+            transition: border-color 0.3s;
+        }
+
+        input[type="text"]:focus {
+            border-color: #1a3c5e;
+            box-shadow: 0 0 0 3px rgba(26, 60, 94, 0.1);
+        }
+
+        .error {
+            color: #dc2626;
+            font-size: 0.8rem;
+            margin-top: 4px;
+        }
+
+        .result-container {
+            margin-top: 24px;
+            padding: 16px;
+            background-color: #f9fafb;
+            border-radius: 8px;
+            border: 1px solid #e5e7eb;
+        }
+
+        .result-container p {
+            font-size: 0.9rem;
+            margin-bottom: 8px;
+        }
+
+        .result-container p strong {
+            color: #1a3c5e;
+        }
+
+        .payment-instruction {
+            font-size: 0.9rem;
+            color: #1a3c5e;
+            margin-top: 16px;
+            text-align: center;
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 12px;
+            font-size: 1rem;
+            font-weight: 500;
+            color: #fff;
+            background-color: #1a3c5e;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            text-align: center;
+            margin-top: 16px;
+        }
+
+        .btn:hover {
+            background-color: #15324d;
+        }
+
+        .no-result {
+            text-align: center;
+            color: #6b7280;
+            font-size: 0.9rem;
+            margin-top: 24px;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 16px;
+            }
+
+            .logo {
+                max-width: 80px;
+            }
+
+            h1 {
+                font-size: 1.3rem;
+                margin-bottom: 24px;
+            }
+
+            input[type="text"] {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+
+            .btn {
+                font-size: 0.9rem;
+                padding: 10px;
+            }
+
+            .payment-instruction {
+                font-size: 0.8rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <img src="favicon.ico" alt="Logotipo IPTU Careiro" class="logo">
+        <h1>Consulta de IPTU Careiro</h1>
+        <div class="form-group">
+            <label for="cpfConsulta">CPF</label>
+            <input type="text" id="cpfConsulta" placeholder="Digite o CPF" maxlength="14" inputmode="numeric" required>
+            <div id="cpfConsultaError" class="error"></div>
+        </div>
+        <button class="btn" onclick="consultarIPTU()">Consultar</button>
+        <div id="resultadoConsulta" class="result-container" style="display: none;">
+            <p><strong>Nome Completo:</strong> <span id="resultNome"></span></p>
+            <p><strong>CPF:</strong> <span id="resultCpf"></span></p>
+            <p><strong>Valor do IPTU:</strong> <span id="resultIptu"></span></p>
+            <p class="payment-instruction">Efetue o pagamento no Setor de Tributos da Prefeitura do Careiro.</p>
+        </div>
+        <div id="noResult" class="no-result" style="display: none;">
+            Nenhum registro encontrado para o CPF informado.
+        </div>
+    </div>
+
+    <script>
+        // Inicializar Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVW8YN4jRdRv5uYyPxWV_cZ8oS0a2I7hk",
+            authDomain: "iptucareiro.firebaseapp.com",
+            projectId: "iptucareiro",
+            storageBucket: "iptucareiro.firebasestorage.app",
+            messagingSenderId: "247099053843",
+            appId: "1:247099053843:web:08717a5344fe36f00dece6"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.firestore();
+        const auth = firebase.auth();
+
+        // Verificar autenticação do usuário
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                // Se não estiver autenticado, redirecionar para login.html
+                window.location.href = 'login.html';
+            }
+        });
+
+        // Função para formatar valor em reais
+        function formatarReais(valor) {
+            return parseFloat(valor).toLocaleString('pt-BR', { style: 'currency', currency: 'BRL' });
+        }
+
+        // Máscara para CPF
+        function aplicarMascaraCPF() {
+            const cpfInput = document.getElementById('cpfConsulta');
+            cpfInput.addEventListener('input', function (e) {
+                let value = e.target.value.replace(/\D/g, '');
+                if (value.length <= 11) {
+                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                    value = value.replace(/(\d{3})(\d)/, '$1.$2');
+                    value = value.replace(/(\d{3})(\d{1,2})$/, '$1-$2');
+                }
+                e.target.value = value;
+            });
+
+            cpfInput.addEventListener('blur', function () {
+                const errorDiv = document.getElementById('cpfConsultaError');
+                const value = this.value.replace(/\D/g, '');
+                if (value.length === 11) {
+                    if (!validarCPF(this.value)) {
+                        errorDiv.textContent = 'CPF inválido';
+                    } else {
+                        errorDiv.textContent = '';
+                    }
+                } else {
+                    errorDiv.textContent = 'CPF inválido';
+                }
+            });
+        }
+
+        // Função para validar CPF
+        function validarCPF(cpf) {
+            cpf = cpf.replace(/\D/g, '');
+            if (cpf.length !== 11 || /^(\d)\1+$/.test(cpf)) return false;
+            let soma = 0, resto;
+            for (let i = 1; i <= 9; i++) soma += parseInt(cpf.charAt(i - 1)) * (11 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            if (resto !== parseInt(cpf.charAt(9))) return false;
+            soma = 0;
+            for (let i = 1; i <= 10; i++) soma += parseInt(cpf.charAt(i - 1)) * (12 - i);
+            resto = (soma * 10) % 11;
+            if (resto === 10 || resto === 11) resto = 0;
+            return resto === parseInt(cpf.charAt(10));
+        }
+
+        // Função para consultar IPTU
+        async function consultarIPTU() {
+            const cpfInput = document.getElementById('cpfConsulta');
+            const cpf = cpfInput.value.replace(/\D/g, '');
+            const errorDiv = document.getElementById('cpfConsultaError');
+            const resultadoConsulta = document.getElementById('resultadoConsulta');
+            const noResult = document.getElementById('noResult');
+
+            if (!cpf || !validarCPF(cpf)) {
+                errorDiv.textContent = 'Por favor, insira um CPF válido.';
+                resultadoConsulta.style.display = 'none';
+                noResult.style.display = 'none';
+                return;
+            }
+
+            errorDiv.textContent = '';
+            try {
+                const querySnapshot = await db.collection('IPTU')
+                    .where('cpfCnpj', '==', cpfInput.value)
+                    .get();
+
+                resultadoConsulta.style.display = 'none';
+                noResult.style.display = 'none';
+
+                if (querySnapshot.empty) {
+                    noResult.style.display = 'block';
+                    return;
+                }
+
+                const doc = querySnapshot.docs[0];
+                const data = doc.data();
+                document.getElementById('resultNome').textContent = data.nomeCompleto || 'N/A';
+                document.getElementById('resultCpf').textContent = data.cpfCnpj || 'N/A';
+                document.getElementById('resultIptu').textContent = data.iptu ? formatarReais(data.iptu.replace('R$', '').replace(/\./g, '').replace(',', '.')) : 'N/A';
+                resultadoConsulta.style.display = 'block';
+            } catch (error) {
+                console.error('Erro ao consultar IPTU:', error);
+                alert('Erro ao consultar IPTU. Verifique o console para mais detalhes.');
+            }
+        }
+
+        // Evento para consultar ao pressionar Enter
+        document.getElementById('cpfConsulta').addEventListener('keypress', function (e) {
+            if (e.key === 'Enter') {
+                consultarIPTU();
+            }
+        });
+
+        // Inicializar máscara
+        aplicarMascaraCPF();
+    </script>
+</body>
+</html>

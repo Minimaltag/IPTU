@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login - IPTU Careiro</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <!-- Adicionando Firebase SDK (versão compat) -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Roboto', sans-serif;
+            background: linear-gradient(135deg, #1e3a8a, #3b82f6);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .login-container {
+            background: white;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.2);
+            max-width: 400px;
+            width: 100%;
+            text-align: center;
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        .login-container:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.25);
+        }
+
+        h1 {
+            color: #1e3a8a;
+            font-weight: 500;
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 500;
+            color: #4b5563;
+            font-size: 14px;
+        }
+
+        input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 16px;
+            transition: border-color 0.3s ease, box-shadow 0.3s ease;
+        }
+
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+
+        .btn {
+            display: block;
+            width: 100%;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.2s ease;
+            text-align: center;
+            text-decoration: none;
+        }
+
+        .btn-google {
+            background-color: #ffffff;
+            color: #333;
+            border: 1px solid #d1d5db;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 20px;
+        }
+
+        .btn-google img {
+            width: 20px;
+            height: 20px;
+        }
+
+        .btn-google:hover {
+            background-color: #f3f4f6;
+            transform: translateY(-2px);
+        }
+
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+            margin-top: 20px;
+        }
+
+        .btn-primary:hover {
+            background-color: #2563eb;
+            transform: translateY(-2px);
+        }
+
+        .error {
+            color: #dc2626;
+            font-size: 14px;
+            margin-top: 10px;
+            display: none;
+        }
+
+        @media (max-width: 480px) {
+            .login-container {
+                padding: 20px;
+            }
+
+            h1 {
+                font-size: 1.5em;
+            }
+
+            .btn {
+                padding: 12px;
+                font-size: 14px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-container">
+        <h1>Login - IPTU Careiro</h1>
+        <form id="loginForm">
+            <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" placeholder="Digite seu e-mail" required>
+            </div>
+            <div class="form-group">
+                <label for="password">Senha:</label>
+                <input type="password" id="password" placeholder="Digite sua senha" required>
+            </div>
+            <button type="submit" class="btn btn-primary">Entrar</button>
+            <div id="loginError" class="error"></div>
+        </form>
+        <button class="btn btn-google" onclick="loginWithGoogle()">
+            <img src="https://www.gstatic.com/firebasejs/ui/2.0.0/images/auth/google.svg" alt="Google Logo">
+            Entrar com Google
+        </button>
+    </div>
+
+    <script>
+        // Inicializar Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVW8YN4jRdRv5uYyPxWV_cZ8oS0a2I7hk",
+            authDomain: "iptucareiro.firebaseapp.com",
+            projectId: "iptucareiro",
+            storageBucket: "iptucareiro.firebasestorage.app",
+            messagingSenderId: "247099053843",
+            appId: "1:247099053843:web:08717a5344fe36f00dece6"
+        };
+
+        // Inicializar o Firebase usando a versão compat
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Função para login com Google
+        function loginWithGoogle() {
+            const provider = new firebase.auth.GoogleAuthProvider();
+            auth.signInWithPopup(provider)
+                .then((result) => {
+                    // Login bem-sucedido, redirecionar para a página principal
+                    window.location.href = 'index.html'; // Substitua pelo nome do arquivo da página principal
+                })
+                .catch((error) => {
+                    console.error('Erro ao fazer login com Google:', error);
+                    const errorDiv = document.getElementById('loginError');
+                    errorDiv.textContent = 'Erro ao fazer login com Google. Tente novamente.';
+                    errorDiv.style.display = 'block';
+                });
+        }
+
+        // Função para login com e-mail e senha
+        document.getElementById('loginForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const errorDiv = document.getElementById('loginError');
+
+            auth.signInWithEmailAndPassword(email, password)
+                .then((userCredential) => {
+                    // Login bem-sucedido, redirecionar para a página principal
+                    window.location.href = 'index.html'; // Substitua pelo nome do arquivo da página principal
+                })
+                .catch((error) => {
+                    console.error('Erro ao fazer login com e-mail:', error);
+                    let errorMessage = 'Erro ao fazer login. Verifique seu e-mail e senha.';
+                    
+                    // Personalizar mensagens de erro específicas
+                    switch (error.code) {
+                        case 'auth/invalid-email':
+                            errorMessage = 'E-mail inválido. Verifique o formato do e-mail.';
+                            break;
+                        case 'auth/user-not-found':
+                            errorMessage = 'Usuário não encontrado. Verifique o e-mail ou crie uma conta.';
+                            break;
+                        case 'auth/wrong-password':
+                            errorMessage = 'Senha incorreta. Tente novamente.';
+                            break;
+                        case 'auth/too-many-requests':
+                            errorMessage = 'Muitas tentativas. Tente novamente mais tarde.';
+                            break;
+                        default:
+                            errorMessage = 'Erro ao fazer login. Tente novamente.';
+                    }
+
+                    errorDiv.textContent = errorMessage;
+                    errorDiv.style.display = 'block';
+                });
+        });
+
+        // Verificar estado de autenticação ao carregar a página
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // Usuário já está logado, redirecionar para a página principal
+                window.location.href = 'index.html'; // Substitua pelo nome do arquivo da página principal
+            }
+        });
+    </script>
+</body>
+</html>

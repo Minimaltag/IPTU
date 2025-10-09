@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Alterar Senha - IPTU Careiro</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <!-- Adicionando Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-auth-compat.js"></script>
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f4f8;
+            color: #333;
+        }
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
+            text-align: center;
+        }
+        h1 {
+            color: #1a3c34;
+            margin-bottom: 20px;
+            font-size: 1.8em;
+        }
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 500;
+            color: #4b5563;
+        }
+        input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #d1d5db;
+            border-radius: 5px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .error {
+            color: #dc3545;
+            font-size: 12px;
+            margin-top: 5px;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .btn {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+        }
+        .btn-primary {
+            background-color: #3b82f6;
+            color: white;
+        }
+        .btn-primary:hover {
+            background-color: #2563eb;
+        }
+        .btn-cancel {
+            background-color: #6b7280;
+            color: white;
+        }
+        .btn-cancel:hover {
+            background-color: #4b5563;
+        }
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Alterar Senha</h1>
+        <p>Insira sua senha atual e a nova senha para atualizar sua conta.</p>
+        <form id="alterarSenhaForm">
+            <div class="form-group">
+                <label for="email">E-mail:</label>
+                <input type="email" id="email" readonly>
+            </div>
+            <div class="form-group">
+                <label for="senhaAtual">Senha Atual:</label>
+                <input type="password" id="senhaAtual" required>
+                <div id="senhaAtualError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="novaSenha">Nova Senha:</label>
+                <input type="password" id="novaSenha" required>
+                <div id="novaSenhaError" class="error"></div>
+            </div>
+            <div class="form-group">
+                <label for="confirmarSenha">Confirmar Nova Senha:</label>
+                <input type="password" id="confirmarSenha" required>
+                <div id="confirmarSenhaError" class="error"></div>
+            </div>
+            <div class="button-group">
+                <button type="button" class="btn btn-primary" onclick="alterarSenha()">Salvar Senha</button>
+                <button type="button" class="btn btn-cancel" onclick="voltar()">Cancelar</button>
+            </div>
+        </form>
+    </div>
+
+    <script>
+        // Inicializar Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyCVW8YN4jRdRv5uYyPxWV_cZ8oS0a2I7hk",
+            authDomain: "iptucareiro.firebaseapp.com",
+            projectId: "iptucareiro",
+            storageBucket: "iptucareiro.firebasestorage.app",
+            messagingSenderId: "247099053843",
+            appId: "1:247099053843:web:08717a5344fe36f00dece6"
+        };
+
+        firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        // Verificar autenticação do usuário
+        auth.onAuthStateChanged((user) => {
+            if (!user) {
+                // Se não estiver autenticado, redirecionar para login.html
+                window.location.href = 'login.html';
+            } else {
+                // Preencher o campo de email com o email do usuário logado
+                document.getElementById('email').value = user.email || 'N/A';
+            }
+        });
+
+        // Função para validar a senha
+        function validarSenha(senha) {
+            const minLength = 6;
+            const hasUpperCase = /[A-Z]/.test(senha);
+            const hasLowerCase = /[a-z]/.test(senha);
+            const hasNumber = /\d/.test(senha);
+            const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(senha);
+
+            if (senha.length < minLength) {
+                return 'A senha deve ter pelo menos 6 caracteres.';
+            }
+            if (!hasUpperCase) {
+                return 'A senha deve conter pelo menos uma letra maiúscula.';
+            }
+            if (!hasLowerCase) {
+                return 'A senha deve conter pelo menos uma letra minúscula.';
+            }
+            if (!hasNumber) {
+                return 'A senha deve conter pelo menos um número.';
+            }
+            if (!hasSpecialChar) {
+                return 'A senha deve conter pelo menos um caractere especial.';
+            }
+            return '';
+        }
+
+        // Função para alterar a senha
+        async function alterarSenha() {
+            const senhaAtual = document.getElementById('senhaAtual').value;
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confirmarSenha = document.getElementById('confirmarSenha').value;
+            const senhaAtualError = document.getElementById('senhaAtualError');
+            const novaSenhaError = document.getElementById('novaSenhaError');
+            const confirmarSenhaError = document.getElementById('confirmarSenhaError');
+            const user = auth.currentUser;
+
+            // Limpar mensagens de erro
+            senhaAtualError.textContent = '';
+            novaSenhaError.textContent = '';
+            confirmarSenhaError.textContent = '';
+
+            // Validar nova senha
+            const erroSenha = validarSenha(novaSenha);
+            if (erroSenha) {
+                novaSenhaError.textContent = erroSenha;
+                return;
+            }
+
+            // Verificar se as senhas coincidem
+            if (novaSenha !== confirmarSenha) {
+                confirmarSenhaError.textContent = 'As senhas não coincidem.';
+                return;
+            }
+
+            try {
+                // Reautenticar o usuário
+                const credential = firebase.auth.EmailAuthProvider.credential(user.email, senhaAtual);
+                await user.reauthenticateWithCredential(credential);
+
+                // Alterar a senha
+                await user.updatePassword(novaSenha);
+                alert('Senha alterada com sucesso! Faça login novamente com sua nova senha.');
+                auth.signOut().then(() => {
+                    window.location.href = 'login.html';
+                });
+            } catch (error) {
+                console.error('Erro ao alterar senha:', error);
+                if (error.code === 'auth/wrong-password') {
+                    senhaAtualError.textContent = 'Senha atual incorreta. Tente novamente.';
+                } else if (error.code === 'auth/requires-recent-login') {
+                    alert('Sua sessão expirou. Por favor, faça login novamente para continuar.');
+                    auth.signOut().then(() => {
+                        window.location.href = 'login.html';
+                    });
+                } else if (error.code === 'auth/weak-password') {
+                    novaSenhaError.textContent = 'A senha é muito fraca. Tente uma senha mais forte.';
+                } else {
+                    novaSenhaError.textContent = 'Erro ao alterar a senha. Verifique o console para mais detalhes.';
+                }
+            }
+        }
+
+        // Função para voltar (cancelar)
+        function voltar() {
+            window.location.href = 'index.html'; // Ajuste para a página principal desejada
+        }
+
+        // Validação em tempo real
+        document.getElementById('novaSenha').addEventListener('input', function() {
+            const erro = validarSenha(this.value);
+            document.getElementById('novaSenhaError').textContent = erro;
+        });
+
+        document.getElementById('confirmarSenha').addEventListener('input', function() {
+            const novaSenha = document.getElementById('novaSenha').value;
+            const confirmarSenha = this.value;
+            document.getElementById('confirmarSenhaError').textContent =
+                novaSenha !== confirmarSenha ? 'As senhas não coincidem.' : '';
+        });
+    </script>
+</body>
+</html>

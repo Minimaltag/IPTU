@@ -1,8 +1,14 @@
 const CACHE_NAME = 'iptu-careiro-v1';
 const urlsToCache = [
   '/',
-  '/movel.html',
- 
+  '/index.html',
+  '/movel.html',   
+  '/config.html',
+  '/login.html',
+  '/favicon.ico',
+  '/cadastros.html',
+  '/manifest.json',
+  '/favicon.ico',
 ];
 
 self.addEventListener("install", event => {
@@ -18,3 +24,4 @@ self.addEventListener("fetch", event => {
     })
   );
 });
+;

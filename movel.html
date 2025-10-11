@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Consulta de IPTU Careiro</title>
+    <link rel="icon" href="favicon.ico" type="image/x-icon" />
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
     <!-- Adicionando Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.6.0/firebase-app-compat.js"></script>
@@ -166,6 +167,7 @@
         }
     </style>
 </head>
+<link rel="manifest" href="manifest.json">
 <body>
     <div class="container">
         <img src="favicon.ico" alt="Logotipo IPTU Careiro" class="logo">
@@ -310,5 +312,12 @@
         // Inicializar máscara
         aplicarMascaraCPF();
     </script>
+    <script>
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker.register("sw.js")
+      .then(() => console.log("Service Worker registrado"))
+      .catch(err => console.error("SW erro:", err));
+  }
+</script>
 </body>
 </html>
